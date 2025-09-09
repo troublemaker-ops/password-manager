@@ -111,42 +111,53 @@ c.execute("""CREATE TABLE IF NOT EXISTS username_password(
 username TEXT PRIMARY KEY,
 password TEXT)""")
 
-st.write("welcome to use password manager")
-register=st.radio("",["already have account,sign in","haven't register as a password manager user,sign up"])
+st.write("Welcome to use password manager")
 
+# If already logged in, skip login/signup
+if "logged_in" in st.session_state and st.session_state.logged_in:
+    st.success(f"Welcome back, {st.session_state.username}!")
+else:
+    register = st.radio("", ["already have account, sign in", "haven't register as a password manager user, sign up"])
 
-if register.startswith("sign in"):
-    username = st.text_input("please enter username:")
-    if username:
-        lock = read_data("password", lock_table, "username", username)
-        if lock:
-            lock_password = st.text_input("please enter password:", type="password").replace(" ", "")
-            if lock_password:
-                if lock_password == lock[0]:
-                    st.session_state.logged_in = True
-                    st.session_state.username = username
-                    st.success("you are logged in")
+    # --- SIGN IN ---
+    if register.startswith("sign in"):
+        username = st.text_input("please enter username:")
+        password = st.text_input("please enter password:", type="password")
+
+        if st.button("Sign In"):
+            if not username or not password:
+                st.error("Username and password cannot be empty")
+            else:
+                lock = read_data("password", lock_table, "username", username)
+                if lock:
+                    if password == lock[0]:
+                        st.session_state.logged_in = True
+                        st.session_state.username = username
+                        st.success("You are logged in")
+                        st.experimental_rerun()  # 👈 force refresh into logged-in state
+                    else:
+                        st.error("Your password is wrong. Please try again")
+                        st.stop()
                 else:
-                    st.error("your password is wrong. please try again")
+                    st.error("You have not signed up yet. Please sign up first")
                     st.stop()
-        else:
-            st.error("you have not signed up yet. please sign up first")
-            st.stop()
 
-elif register.startswith("sign up"):
-    st.write("please enter username and password for sign up")
-    username = st.text_input("please enter username:")
-    if username:
-        lock = read_data("password", lock_table, "username", username)
-        if lock:
-            st.error("this username already exists")
-            st.stop()
-        else:
-            lock_password = st.text_input("please enter password:", type="password").replace(" ", "")
-            if lock_password:
-                store_data(lock_table, "username", username, lock_password)
-                st.success("your account has been created successfully. please sign in again")
-                st.stop()
+    # --- SIGN UP ---
+    elif register.startswith("sign up"):
+        username = st.text_input("please enter username for your account:")
+        password = st.text_input("please enter password(remember for the future logins):", type="password")
+
+        if st.button("Sign Up"):
+            if not username or not password:
+                st.error("Username and password cannot be empty")
+            else:
+                lock = read_data("password", lock_table, "username", username)
+                if lock:
+                    st.error("This username already exists")
+                else:
+                    store_data(lock_table, "username", username, password)
+                    st.success("Your account has been created successfully. Please sign in again")
+                    st.stop()
 
 # ---------------------- PASSWORD TABLE ----------------------
 
@@ -185,5 +196,6 @@ if st.session_state.mode != "exit":
         st.session_state.mode = "menu"
 
 conn.close()
+
 
 
