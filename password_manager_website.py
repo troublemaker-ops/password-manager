@@ -135,7 +135,7 @@ else:
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.success("You are logged in")
-                st.experimental_rerun()  # 👈 force refresh into logged-in state
+                
             else:
                 st.error("Your password or username is wrong. Please try again")
                     
@@ -194,6 +194,7 @@ if st.session_state.mode != "exit":
         st.session_state.mode = "menu"
 
 conn.close()
+
 
 
 
