@@ -117,36 +117,44 @@ register=st.radio("",["already have account,sign in","haven't register as a pass
 
 if register.startswith("sign in"):
     username = st.text_input("please enter username:")
-    lock=read_data("password",lock_table,"username",username)
-    if lock:
-        lock_password=st.text_input("please enter password:").replace(" ", "")
-        if lock_password== lock[0]:
-            st.session_state.logged_in = True
-            st.success("you are already logged in")
-        else :
-            st.write("your password is wrong.please try again")
+    if username:
+        lock = read_data("password", lock_table, "username", username)
+        if lock:
+            lock_password = st.text_input("please enter password:", type="password").replace(" ", "")
+            if lock_password:
+                if lock_password == lock[0]:
+                    st.session_state.logged_in = True
+                    st.session_state.username = username
+                    st.success("you are logged in")
+                else:
+                    st.error("your password is wrong. please try again")
+                    st.stop()
+        else:
+            st.error("you have not signed up yet. please sign up first")
             st.stop()
-    else:
-        st.write("you have not sign up yet.please sign up first")
-        st.stop()
-else:
+
+elif register.startswith("sign up"):
     st.write("please enter username and password for sign up")
     username = st.text_input("please enter username:")
-    lock=read_data("password",lock_table,"username",username)
-    if not lock:
-        lock_password = st.text_input("please enter password:").replace(" ", "")
-        store_data(lock_table,"username",username,lock_password)
-        st.write("your account has been created successfully.please sign in again")
-        st.stop()
-    else:
-        st.write("this username already exists")
-        st.stop()
+    if username:
+        lock = read_data("password", lock_table, "username", username)
+        if lock:
+            st.error("this username already exists")
+            st.stop()
+        else:
+            lock_password = st.text_input("please enter password:", type="password").replace(" ", "")
+            if lock_password:
+                store_data(lock_table, "username", username, lock_password)
+                st.success("your account has been created successfully. please sign in again")
+                st.stop()
 
-table_name=f"password_{username}"
+# ---------------------- PASSWORD TABLE ----------------------
 
-c.execute(f"""CREATE TABLE IF NOT EXISTS {table_name}(
-app TEXT PRIMARY KEY,
-password TEXT)""")
+if "logged_in" in st.session_state and st.session_state.logged_in:
+    table_name = f"password_{st.session_state.username}"
+    c.execute(f"""CREATE TABLE IF NOT EXISTS {table_name}(
+    app TEXT PRIMARY KEY,
+    password TEXT)""")
 
 #want=want to stored password or no
 if "mode" not in st.session_state:
@@ -177,4 +185,5 @@ if st.session_state.mode != "exit":
         st.session_state.mode = "menu"
 
 conn.close()
+
 
