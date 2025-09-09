@@ -113,7 +113,7 @@ st.write("welcome to use password manager")
 register=st.radio("",["already have account,sign in","haven't register as a password manager user,sign up"])
 
 
-if register.startswith("in"):
+if register.startswith("sign in"):
     username = st.text_input("please enter username:")
     lock=read_data("password",lock_table,"username",username)
     if lock:
@@ -172,4 +172,5 @@ elif st.session_state.mode == "exit":
 if st.session_state.mode != "exit":
     if st.button("Next step"):
         st.session_state.mode = "menu"
+
 conn.close()
