@@ -41,6 +41,7 @@ def stored_password():
             if satisfy.startswith("y"):
                 store_data(table_name,"app",name,password)
                 st.success("password saved")
+                del st.session_state.generated_password
             else:
                 st.info("click 'generate password' to generate new password")
         else:
@@ -79,6 +80,7 @@ def change_password():
 
                     store_data(table_name,"app",name,password)
                     st.success("password saved")
+                    del st.session_state.generated_password
                 else:
                     st.info("click 'generate password' to generate new password")
             else:
@@ -119,7 +121,8 @@ if register.startswith("sign in"):
     if lock:
         lock_password=st.text_input("please enter password:").replace(" ", "")
         if lock_password== lock[0]:
-            st.write("you are already logged in")
+            st.session_state.logged_in = True
+            st.success("you are already logged in")
         else :
             st.write("your password is wrong.please try again")
             st.stop()
@@ -130,7 +133,7 @@ else:
     st.write("please enter username and password for sign up")
     username = st.text_input("please enter username:")
     lock=read_data("password",lock_table,"username",username)
-    if lock:
+    if not lock:
         lock_password = st.text_input("please enter password:").replace(" ", "")
         store_data(lock_table,"username",username,lock_password)
         st.write("your account has been created successfully.please sign in again")
@@ -174,3 +177,4 @@ if st.session_state.mode != "exit":
         st.session_state.mode = "menu"
 
 conn.close()
+
