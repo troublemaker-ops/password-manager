@@ -129,18 +129,15 @@ else:
         password = st.text_input("please enter password:", type="password")
 
         if st.button("Sign In"):
-            if not username or not password:
-                st.error("Username and password cannot be empty")
-            else:
-                lock = read_data("password", lock_table, "username", username)
+            lock = read_data("password", lock_table, "username", username)
                 
-                    if lock and password == lock[0]:
-                        st.session_state.logged_in = True
-                        st.session_state.username = username
-                        st.success("You are logged in")
-                        st.experimental_rerun()  # 👈 force refresh into logged-in state
-                    else:
-                        st.error("Your password or username is wrong. Please try again")
+            if lock and password == lock[0]:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.success("You are logged in")
+                st.experimental_rerun()  # 👈 force refresh into logged-in state
+            else:
+                st.error("Your password or username is wrong. Please try again")
                     
 
     # --- SIGN UP ---
@@ -197,6 +194,7 @@ if st.session_state.mode != "exit":
         st.session_state.mode = "menu"
 
 conn.close()
+
 
 
 
