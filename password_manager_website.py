@@ -24,9 +24,11 @@ def store_data(table,service,name,password):
     c.execute(f"""INSERT OR REPLACE INTO {table}({service},password) VALUES (?,?)""",(name,password))
     conn.commit()
 
-def stored_password():
+def stored_password(table_name):
 
     name = st.text_input("please enter app or website name:")
+    if not name:
+        return
     data=read_data("*",table_name,"app",name)
     if not data:
         generate = st.radio("do you want system generate password for you?:",["yes","no"])
@@ -51,17 +53,19 @@ def stored_password():
                 st.success("password saved")
 
     else:
-        st.write("password already exists.if you want to change it please choose option change password")
+        st.warning("password already exists.if you want to change it please choose option change password")
 
-def check_password():
+def check_password(table_name):
     name=st.text_input("please enter the app or website name:")
+    if not name:
+        return
     value=read_data("password",table_name,"app",name)
     if value:
         st.text_input(f"The password of {name} is: {value[0]}",type="password")
     else:
         st.write(f"The password of {name} have not save yet")
 
-def change_password():
+def change_password(table_name):
 
     name=st.text_input("please enter app or website name that you want to change:")
     data=read_data("password",table_name,"app",name)
@@ -120,7 +124,7 @@ else:
     register = st.radio("", ["already have account, sign in", "haven't register as a password manager user, sign up"])
 
     # --- SIGN IN ---
-    if register.startswith("sign in"):
+    if register.startswith("already"):
         username = st.text_input("please enter username:")
         password = st.text_input("please enter password:", type="password")
 
@@ -129,21 +133,18 @@ else:
                 st.error("Username and password cannot be empty")
             else:
                 lock = read_data("password", lock_table, "username", username)
-                if lock:
-                    if password == lock[0]:
+                
+                    if lock and password == lock[0]:
                         st.session_state.logged_in = True
                         st.session_state.username = username
                         st.success("You are logged in")
                         st.experimental_rerun()  # 👈 force refresh into logged-in state
                     else:
-                        st.error("Your password is wrong. Please try again")
-                        st.stop()
-                else:
-                    st.error("You have not signed up yet. Please sign up first")
-                    st.stop()
+                        st.error("Your password or username is wrong. Please try again")
+                    
 
     # --- SIGN UP ---
-    elif register.startswith("sign up"):
+    else:
         username = st.text_input("please enter username for your account:")
         password = st.text_input("please enter password(remember for the future logins):", type="password")
 
@@ -181,11 +182,11 @@ if st.session_state.mode == "menu":
 
 # Handle actions
 if st.session_state.mode == "store password":
-    stored_password()
+    stored_password(table_name)
 elif st.session_state.mode == "check password":
-    check_password()
+    check_password(table_name)
 elif st.session_state.mode == "change password":
-    change_password()
+    change_password(table_name)
 elif st.session_state.mode == "exit":
     st.write("Thank you for using this program")
     st.stop()
@@ -196,6 +197,7 @@ if st.session_state.mode != "exit":
         st.session_state.mode = "menu"
 
 conn.close()
+
 
 
 
