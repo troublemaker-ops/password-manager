@@ -178,15 +178,16 @@ if st.session_state.mode == "menu":
     )
 
 # Handle actions
-if st.session_state.mode == "store password":
-    stored_password(table_name)
-elif st.session_state.mode == "check password":
-    check_password(table_name)
-elif st.session_state.mode == "change password":
-    change_password(table_name)
-elif st.session_state.mode == "exit":
-    st.write("Thank you for using this program")
-    st.stop()
+if table_name:
+    if st.session_state.mode == "store password":
+        stored_password(table_name)
+    elif st.session_state.mode == "check password":
+        check_password(table_name)
+    elif st.session_state.mode == "change password":
+        change_password(table_name)
+    elif st.session_state.mode == "exit":
+        st.write("Thank you for using this program")
+        st.stop()
 
 # Navigation
 if st.session_state.mode != "exit":
@@ -194,6 +195,7 @@ if st.session_state.mode != "exit":
         st.session_state.mode = "menu"
 
 conn.close()
+
 
 
 
